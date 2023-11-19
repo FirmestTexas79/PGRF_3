@@ -15,9 +15,5 @@ public class EquilateralTriangle<P> {
             liner.drawLine(image,polygon.getPoint(i).getC1(),polygon.getPoint(i).getR1(),
                     polygon.getPoint(next).getC1(),polygon.getPoint(next).getR1(),pixel);
         }
-
-
-
-
     }
 }

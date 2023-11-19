@@ -12,6 +12,17 @@ import java.util.List;
 
 public class ScanLineImpl <P> implements ScanLine<P>{
 
+
+    /**
+     * Metoda pro vyplnění polygonu na obrázku pomocí algoritmu Scan-Line.
+     *
+     * @param polygon2D    Polygon2D instance reprezentující polygon
+     * @param img          RasterImage instance pro vykreslení
+     * @param polygoner2D  Polygoner2D instance pro vykreslení polygonu
+     * @param areaPixel    Hodnota pixelu pro vyplnění oblasti
+     * @param polygonPixel Hodnota pixelu pro vyplnění polygonu
+     * @param liner        Liner instance pro kreslení
+     */
     @Override
     public void fill(
             final @NotNull Polygon2D polygon2D,

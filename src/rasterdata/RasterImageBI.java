@@ -8,24 +8,51 @@ import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 public class RasterImageBI implements RasterImage<Integer>, Presentable<Graphics> {
-    private final @Nullable Graphics graphics;  // Renamed 'g' to 'graphics' for clarity
+
+    // Grafický kontext pro práci s obrázkem
+    private final @Nullable Graphics graphics;
+
+    // BufferedImage pro uchování pixelů obrázku
     private final BufferedImage bufferedImage;
 
+    /**
+     * Konstruktor pro vytvoření instance třídy s danou šířkou a výškou obrázku.
+     *
+     * @param width  Šířka obrázku
+     * @param height Výška obrázku
+     */
     public RasterImageBI(int width, int height) {
         this.bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         graphics = bufferedImage.getGraphics();
     }
 
+    /**
+     * Metoda pro získání šířky obrázku.
+     *
+     * @return Šířka obrázku
+     */
     @Override
     public int getWidth() {
         return bufferedImage.getWidth();
     }
 
+    /**
+     * Metoda pro získání výšky obrázku.
+     *
+     * @return Výška obrázku
+     */
     @Override
     public int getHeight() {
         return bufferedImage.getHeight();
     }
 
+    /**
+     * Metoda pro získání hodnoty pixelu na zadaných souřadnicích.
+     *
+     * @param column Sloupec (x-ová souřadnice) pixelu
+     * @param row    Řádek (y-ová souřadnice) pixelu
+     * @return Hodnota pixelu na zadaných souřadnicích v podobě Optional
+     */
     @Override
     public Optional<Integer> getPixel(int column, int row) {  // Renamed 'c' to 'column', 'r' to 'row' for clarity
         if (isValidPixel(column, row)) {
@@ -35,6 +62,13 @@ public class RasterImageBI implements RasterImage<Integer>, Presentable<Graphics
         }
     }
 
+    /**
+     * Metoda pro nastavení hodnoty pixelu na zadaných souřadnicích.
+     *
+     * @param column   Sloupec (x-ová souřadnice) pixelu
+     * @param row      Řádek (y-ová souřadnice) pixelu
+     * @param newValue Nová hodnota pixelu
+     */
     @Override
     public void setPixel(int column, int row, Integer newValue) {  // Renamed 'c' to 'column', 'r' to 'row' for clarity
         if (isValidPixel(column, row)) {
@@ -42,6 +76,11 @@ public class RasterImageBI implements RasterImage<Integer>, Presentable<Graphics
         }
     }
 
+    /**
+     * Metoda pro vyčištění celého obrázku danou barvou.
+     *
+     * @param color Barva pro vyčištění
+     */
     @Override
     public void clear(final @NotNull Integer color) {
         final @Nullable Graphics g = bufferedImage.getGraphics();
@@ -51,6 +90,9 @@ public class RasterImageBI implements RasterImage<Integer>, Presentable<Graphics
         }
     }
 
+    /**
+     * Metoda pro kreslení nápovědy na obrázek.
+     */
     public void drawHelp() {
         if (graphics != null) {
             graphics.setColor(new Color(255, 100, 200));
@@ -75,6 +117,11 @@ public class RasterImageBI implements RasterImage<Integer>, Presentable<Graphics
         }
     }
 
+    /**
+     * Metoda pro nastavení stylu písma pro nápovědu.
+     *
+     * @param g Grafický kontext
+     */
     private void setFontStyle(Graphics g) {
         g.setFont(new Font("Monospaced", Font.BOLD, 14));
     }
@@ -83,6 +130,12 @@ public class RasterImageBI implements RasterImage<Integer>, Presentable<Graphics
         g.drawString(text, 5, y);
     }
 
+    /**
+     * Metoda pro vykreslení obsahu obrázku na zadaný grafický kontext.
+     *
+     * @param device Grafický kontext pro vykreslení
+     * @return Grafický kontext s vykresleným obsahem obrázku
+     */
     @Override
     public Graphics present(final Graphics device) {
         device.drawImage(bufferedImage, 0, 0, null);

@@ -13,6 +13,9 @@ import java.awt.event.*;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+/**
+ * Třída reprezentující plátno pro kreslení grafických prvků.
+ */
 
 public class Canvas {
 
@@ -52,13 +55,15 @@ public class Canvas {
 
 
 	public Canvas(int width, int height) {
-		frame = new JFrame();
 
+		// Inicializace okna aplikace
+		frame = new JFrame();
 		frame.setLayout(new BorderLayout());
 		frame.setTitle("PGRF Maťašovský : " + this.getClass().getName());
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+		// Inicializace rastrového obrazu a nástrojů pro kreslení
 		final @NotNull RasterImageBI auxRasterImageBI = new RasterImageBI(width, height);
 		RImage = auxRasterImageBI;
 		presenter = auxRasterImageBI;
@@ -75,7 +80,7 @@ public class Canvas {
 		patternFill = new PatternFillImpl();
 		polygonCutter = new PolygonCutter<>();
 
-
+		// Inicializace panelu pro kreslení
 		panel = new JPanel() {		// Inicializace panelu pro kreslení
 
 			private static final long serialVersionUID = 1L;
@@ -87,6 +92,7 @@ public class Canvas {
 			}
 		};
 
+		// Přidání posluchače pohybu myši
 		panel.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
@@ -207,12 +213,15 @@ public class Canvas {
 			}
 		});
 
+		// Nastavení rozměrů panelu
 		panel.setPreferredSize(new Dimension(width, height));
 
+		// Přidání panelu do okna
 		frame.add(panel, BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
 
+		// Přidání posluchače klávesnice
 		frame.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
@@ -221,29 +230,39 @@ public class Canvas {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_C) {
-					System.out.println("C was pressed!-Clear the board");
-					clear();
-					present();
-				} else if (e.getKeyCode() == KeyEvent.VK_L) {
-					System.out.println("L was pressed-TrivialLiner");
+				if (e.getKeyCode() == KeyEvent.VK_L) {
+					System.out.println("TrivialLiner");
 					mode=1;
 				} else if (e.getKeyCode() == KeyEvent.VK_D) {
-					System.out.println("D was pressed-DottedLiner");
+					System.out.println("DottedLiner");
 					mode=2;
 				}else if (e.getKeyCode() == KeyEvent.VK_P) {
-					System.out.println("P was pressed-Polygon");
+					System.out.println("Polygon");
 					mode=3;
-				}else if (e.getKeyCode() == KeyEvent.VK_S) {
-					System.out.println("S was pressed-Delete all Points");
+				}else if (e.getKeyCode() == KeyEvent.VK_C) {
+					System.out.println("Delete all Points");
 					polygonReady=false;
 					reset();
 					present();
 				}else if (e.getKeyCode() == KeyEvent.VK_T) {
-					System.out.println("T was pressed-Triangle");
+					System.out.println("Triangle");
 					mode=4;
 
-				}else if (e.getKeyCode() == KeyEvent.VK_F) {
+				} else if (e.getKeyCode() == KeyEvent.VK_S) {
+					System.out.println("Delete last point");
+					if (mode == 3 && polygonA.getPoints().size() > 0) {
+						polygonA.getPoints().remove(polygonA.getPoints().size() - 1);
+						polygonReady = polygonA.getPoints().size() > 2; // Adjust polygonReady flag
+						clear();
+						draw(() -> {
+							polygoner2D.drawPolygon(RImage, 0x00ff00, liner, polygonA);
+							polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
+						});
+					}
+				}
+
+
+				else if (e.getKeyCode() == KeyEvent.VK_F) {
 					System.out.println("ScanLine");
 					draw(() -> {
 						scanLine.fill(polygonA, RImage,polygoner2D,patternFill.fill(c1%2,r1%2),0xffff00,liner);
@@ -253,10 +272,6 @@ public class Canvas {
 				}else if (e.getKeyCode() == KeyEvent.VK_B) {
 					System.out.println("Vyber si bod pro seedfill");
 					mode=5;
-
-
-				} else if (e.getKeyCode() == KeyEvent.VK_W) {
-					System.out.println("SeedFill4-Barva pozadi");
 
 
 					if (bodSeedFill==true){

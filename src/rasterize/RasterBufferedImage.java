@@ -21,6 +21,11 @@ public class RasterBufferedImage implements Raster {
         graphics.drawImage(img, 0, 0, null);
     }
 
+    /**
+     * Metoda pro vykreslení obrázku na základě jiné instance třídy RasterBufferedImage.
+     *
+     * @param raster RasterBufferedImage instance pro vykreslení
+     */
     public void draw(RasterBufferedImage raster) {
         Graphics graphics = getGraphics();
         graphics.setColor(new Color(color));
