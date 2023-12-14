@@ -1,12 +1,14 @@
-import objectdata.Point2D;
-import objectdata.Polygon2D;
+import objectdata.*;
+import objectdata.Point;
+import objectops.RenderLineList;
+import objectops.Renderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rasterdata.Presentable;
-import rasterdata.RasterImageBI;
 import rasterdata.RasterImage;
+import rasterdata.RasterImageBI;
 import rasterops.*;
-
+import transform.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -14,75 +16,101 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * Třída reprezentující plátno pro kreslení grafických prvků.
+ * trida pro kresleni na platno: zobrazeni pixelu
+ *
+ * @author PGRF FIM UHK
+ * @version 2020
  */
 
 public class Canvas {
 
-
 	private JFrame frame;
 	private JPanel panel;
-
-
-	private final @NotNull RasterImage<Integer> RImage;
+	private final @NotNull RasterImage<Integer> img;
 	private final @NotNull Presentable<Graphics> presenter;
 	private final @NotNull Liner<Integer> liner;
 	private final @NotNull Liner<Integer> dottedLiner;
 	private final @NotNull Polygon2D polygon2D;
 	private final @NotNull Polygoner2D<Integer> polygoner2D;
-	private final @NotNull MidPointLiner<Integer> mpLiner;
-	private final @NotNull EquilateralTriangle<Integer> eqtriangle;
-	private final @NotNull SeedFill4<Integer> seedFill4;
-	private final @NotNull SeedFill8<Integer> seedFill8;
-	private final @NotNull SeedFill4Queue<Integer> seedFill4Queue;
-	private final @NotNull ScanLine<Integer> scanLine;
-	private final @NotNull PatternFillImpl patternFill;
-	private final @NotNull PolygonCutter<Integer> polygonCutter;
+
 	private int c1, r1, c2, r2;
-	private int mode = 1;
-	private int x;
-	private int y;
-
-	boolean polygonReady=false;
-	boolean cropperReady=false;
-	boolean triangleReady=false;
-	boolean bodSeedFill=false;
-	int seedFillX;
-	int seedFillY;
-	Polygon2D polygonA=new Polygon2D();
-	Polygon2D polygonCrop=new Polygon2D();
-
+	private final @NotNull SeedFill<Integer> seedFill;
+	private final Scene scene;
+	private final Scene scenex;
+	private final Scene sceney;
+	private final Scene scenez;
+	private final Renderer<Integer> renderer;
+	private Camera camera;
+	private Mat4 cubeTransform;
+	private boolean rotace;
+	private int modRotace=0;
+	private boolean isCube=true;
+	private boolean isPyramid;
+	private boolean isPrism=true;
+	private boolean isSinus=true;
+	private boolean isAnimace=false;
+	private final @NotNull Cube cube;
+	private final @NotNull Cube animatedCube;
+	private final @NotNull Pyramid pyramid;
+	private final @NotNull Prism prism;
+	private final @NotNull Sinus sinus;
+	private @NotNull Mat4 projectionMatrix;
+	private @NotNull Mat4 orthMatrix;
+	private Vec3D pos;
+	private final Mat4 anim2;
+	private final Mat4 anim1;
+	private final Mat4 zvetseniAnim;
+	int modProjekce=0;
 
 
 	public Canvas(int width, int height) {
-
-		// Inicializace okna aplikace
 		frame = new JFrame();
 		frame.setLayout(new BorderLayout());
-		frame.setTitle("PGRF Maťašovský : " + this.getClass().getName());
+		frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-		// Inicializace rastrového obrazu a nástrojů pro kreslení
 		final @NotNull RasterImageBI auxRasterImageBI = new RasterImageBI(width, height);
-		RImage = auxRasterImageBI;
+		img = auxRasterImageBI;
 		presenter = auxRasterImageBI;
 		polygon2D = new Polygon2D();
 		polygoner2D = new Polygoner2D<>();
+		cube=new Cube();
+		animatedCube=new Cube();
+		pyramid=new Pyramid();
+		prism=new Prism();
+		sinus=new Sinus(50000);
 		liner = new TrivialLiner<>();
 		dottedLiner = new DottedLiner<>(1, 5);
-		mpLiner = new MidPointLiner<>();
-		eqtriangle = new EquilateralTriangle<>();
-		seedFill4 = new SeedFill4<>();
-		seedFill8 = new SeedFill8<>();
-		seedFill4Queue = new SeedFill4Queue<>();
-		scanLine = new ScanLineImpl<>();
-		patternFill = new PatternFillImpl();
-		polygonCutter = new PolygonCutter<>();
+		seedFill = new SeedFill4<>();
+		scene=new Scene();
+		scene.addSolid(cube);
+		scene.addSolid(prism);
+		scenex=new Scene();
+		scenex.addSolid(new AxisX());
+		sceney=new Scene();
+		sceney.addSolid(new AxisY());
+		scenez=new Scene();
+		scenez.addSolid(new AxisZ());
+		scene.addSolid(sinus);
+		anim1 = new Mat4RotZ(0.03).mul(new Mat4Scale(1.01)).mul(new Mat4RotY(0.03)).mul(new Mat4RotX(-0.01));
+		anim2 = new Mat4RotZ(0.03).mul(new Mat4Scale(0.99)).mul(new Mat4RotY(0.03)).mul(new Mat4RotX(-0.01));
+		zvetseniAnim = new Mat4Scale(2);
+		sceney.addSolid(new Plocha());
 
-		// Inicializace panelu pro kreslení
-		panel = new JPanel() {		// Inicializace panelu pro kreslení
+		scenex.addSolid(new Bezier(50000, new Point3D(-1,-3,1),new Point3D(-0.5,-3,0),new Point3D(1,-3,2),new Point3D(2,-3,3)));
+		scenex.addSolid(new Ferguson(50000,new Point3D(-1,-4,2),new Point3D(-0.5,-4,0),new Point3D(1,-4,2),new Point3D(2,-4,3)));
+		scenex.addSolid(new Coons(50000,new Point3D(-1,-6,2),new Point3D(-0.5,-6,0),new Point3D(1,-6,2),new Point3D(2,-6,3)));
 
+		renderer=new RenderLineList<>();
+		pos = new Vec3D(3.2, 4, 3);
+		camera=new Camera()
+				.withPosition(pos)
+				.withAzimuth(getAzimuthToOrigin(pos))
+				.withZenith(getZenithToOrigin(pos));
+
+		projectionMatrix=new Mat4PerspRH(Math.PI/4,1,0.1,200);
+		orthMatrix=new Mat4OrthoRH(img.getWidth() / 40.0, img.getHeight() / 40.0, -200, 200);
+		panel = new JPanel() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -92,56 +120,32 @@ public class Canvas {
 			}
 		};
 
-		// Přidání posluchače pohybu myši
 		panel.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
-			public void mouseDragged(MouseEvent e) {
-				clear();
-				c2 = e.getX();
-				r2 = e.getY();
-
-
-				if(mode==1){
-					liner.drawLine(RImage,c1, r1, e.getX(), e.getY(), 0x6a00a3);
-				}
-
-				if(mode==2){
-					dottedLiner.drawLine(RImage, c1, r1, e.getX(), e.getY(), 0x00ffea);
-				}
-
-				if(mode==3){
-					if (polygonReady==true){
-						liner.drawLine(RImage, polygonA.getX(0), polygonA.getY(0), e.getX(), e.getY(), 0xff6f61);
-						liner.drawLine(RImage, x, y, e.getX(), e.getY(), 0xd65dfe);
-					}
-					polygoner2D.drawPolygon(RImage, 0xe78be7, liner, polygonA);
-					polygoner2D.drawPolygon(RImage, 0xa52a2a, liner, polygonCrop);
-				}
-				if(mode==4){
-					if (polygonReady==true){
-						liner.drawLine(RImage, polygonA.getPoint(0).getC1(), polygonA.getPoint(0).getR1(), e.getX(), e.getY(), 0xff00ff);
-						liner.drawLine(RImage, x, y, e.getX(), e.getY(), 0xff00ff);
-					}
-					eqtriangle.drawTriangle(RImage, 0x00f1a1, liner, polygon2D);
-					if (triangleReady==true){
-						dottedLiner.drawLine(RImage,
-								(int) mpLiner.getMidPoint(RImage,polygonA.getPoint(0).getC1(), polygonA.getPoint(0).getR1(),polygonA.getPoint(1).getC1(), polygonA.getPoint(1).getR1(), 0xffffff).getX(),
-								(int) mpLiner.getMidPoint(RImage,polygonA.getPoint(0).getC1(), polygonA.getPoint(0).getR1(),polygonA.getPoint(1).getC1(), polygonA.getPoint(1).getR1(), 0xffffff).getY(),
-								c2, r2, 0xff00ff);
-					}
-				}
-				if(mode==6){
-					if (cropperReady==true){
-						liner.drawLine(RImage, polygonCrop.getX(0), polygonCrop.getY(0), e.getX(), e.getY(), 0x00d8ff);
-						liner.drawLine(RImage, x, y, e.getX(), e.getY(), 0xffff00);
-					}
-					polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-					polygoner2D.drawPolygon(RImage, 0xffff00, liner, polygonA);
-				}
-				present();
+			public void mouseDragged(MouseEvent e){
+				final double dc=c1-e.getX();
+				final double dr=r1-e.getY();
+				c1=e.getX();
+				r1=e.getY();
+				camera=camera.addAzimuth(dc/img.getWidth()).addZenith(dr/img.getHeight());
+				renderScene();
 			}
 		});
+		final double[] mouseWheelMoved = {0};
+		panel.addMouseWheelListener(new MouseAdapter() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				mouseWheelMoved[0] += e.getPreciseWheelRotation();
 
+				final double[] moveBy = {0.1};
+				// zoom camera with mouse wheel
+				if (mouseWheelMoved[0] != 0) {
+					camera = camera.move(camera.getViewVector().mul(moveBy[0] * 5 * -mouseWheelMoved[0]));
+					mouseWheelMoved[0] = 0;
+					renderScene();
+				}
+			}
+		});
 		panel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -151,77 +155,18 @@ public class Canvas {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				c2 = e.getX();
-				r2 = e.getY();
-				if(mode==2){
-					draw(() -> dottedLiner.drawLine(RImage, c1, r1, c2, r2, 0xFFC0CB));
-				}
-				else if(mode==1){
-					draw(() -> liner.drawLine(RImage, c1, r1, c2, r2, 0xA52A2A));
-				}
-				else if(mode==3){
-					mousePressed(e);
-					draw(() -> {
-						x=e.getX();
-						y=e.getY();
-						polygonA.addPoint(new Point2D(e.getX(), e.getY()));
-						polygoner2D.drawPolygon(RImage, 0x00ff00, liner, polygonA);
-						polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-						polygonReady = true;
-					});
-				}
-				else if(mode==4){
-					mousePressed(e);
-					draw(() -> {
-						x=e.getX();
-						y=e.getY();
-						polygon2D.addPoint(new Point2D(e.getX(), e.getY()));
-						eqtriangle.drawTriangle(RImage, 0xFFA500, liner, polygon2D);
-						polygonReady=true;
-					});
-					if (triangleReady==true){
-
-						dottedLiner.drawLine(RImage,
-								(int) mpLiner.getMidPoint(RImage,polygonA.getPoint(0).getC1(), polygonA.getPoint(0).getR1(),polygonA.getPoint(1).getC1(), polygonA.getPoint(1).getR1(), 0xffffff).getX(),
-								(int) mpLiner.getMidPoint(RImage,polygonA.getPoint(0).getC1(), polygonA.getPoint(0).getR1(),polygonA.getPoint(1).getC1(), polygonA.getPoint(1).getR1(), 0xffffff).getY(),
-								c2, r2, 0x00fff5);
-					}
-					triangleReady=true;
-
-				}else if(mode==5){
-					seedFillX=e.getX();
-					seedFillY=e.getY();
-					draw(() -> {
-						polygoner2D.drawPolygon(RImage, 0xffff00, liner, polygonA);
-						polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-					});
-					bodSeedFill=true;
-					mode=3;
-				}
-				else if(mode==6){
-					mousePressed(e);
-					draw(() -> {
-						x=e.getX();
-						y=e.getY();
-						polygonCrop.addPoint(new Point2D(e.getX(), e.getY()));
-						polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-
-						polygoner2D.drawPolygon(RImage, 0xffff00, liner, polygonA);
-						cropperReady=true;
-					});
-				}
 			}
+
 		});
 
-		// Nastavení rozměrů panelu
+
 		panel.setPreferredSize(new Dimension(width, height));
 
-		// Přidání panelu do okna
 		frame.add(panel, BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
 
-		// Přidání posluchače klávesnice
+
 		frame.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
@@ -230,124 +175,147 @@ public class Canvas {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_L) {
-					System.out.println("TrivialLiner");
-					mode=1;
-				} else if (e.getKeyCode() == KeyEvent.VK_D) {
-					System.out.println("DottedLiner");
-					mode=2;
-				}else if (e.getKeyCode() == KeyEvent.VK_P) {
-					System.out.println("Polygon");
-					mode=3;
-				}else if (e.getKeyCode() == KeyEvent.VK_C) {
-					System.out.println("Delete all Points");
-					polygonReady=false;
-					reset();
-					present();
-				}else if (e.getKeyCode() == KeyEvent.VK_T) {
-					System.out.println("Triangle");
-					mode=4;
+				if (e.getKeyCode() == KeyEvent.VK_D) {
+					camera=camera.right(0.1);
+					renderScene();
+				} if (e.getKeyCode() == KeyEvent.VK_W){
+					camera=camera.forward(0.1);
+					renderScene();
 
-				} else if (e.getKeyCode() == KeyEvent.VK_S) {
-					System.out.println("Delete last point");
-					if (mode == 3 && polygonA.getPoints().size() > 0) {
-						polygonA.getPoints().remove(polygonA.getPoints().size() - 1);
-						polygonReady = polygonA.getPoints().size() > 2; // Adjust polygonReady flag
-						clear();
-						draw(() -> {
-							polygoner2D.drawPolygon(RImage, 0x00ff00, liner, polygonA);
-							polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-						});
-					}
+				} if (e.getKeyCode() == KeyEvent.VK_S){
+					camera=camera.backward(0.1);
+					renderScene();
+				} if (e.getKeyCode() == KeyEvent.VK_A){
+					camera=camera.left(0.1);
+					renderScene();
+				} if (e.getKeyCode() == KeyEvent.VK_SPACE){
+
+					camera=camera.up(0.1);
+					renderScene();
 				}
+				if (e.getKeyCode() == KeyEvent.VK_SHIFT){
+					camera=camera.down(0.1);
+					renderScene();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_Z){
+					modRotace=1;
+					rotace=!rotace;
+					if(rotace==true){
+						timer.start();
+					}else{timer.stop();}
+				}
+				if (e.getKeyCode() == KeyEvent.VK_X){
+					modRotace=2;
+					rotace=!rotace;
+					if(rotace==true){
+						timer.start();
+					}else{timer.stop();}
+				}
+				if (e.getKeyCode() == KeyEvent.VK_Y){
+					modRotace=3;
+					rotace=!rotace;
+					if(rotace==true){
+						timer.start();
+					}else{timer.stop();}
+				}
+				if (e.getKeyCode() == KeyEvent.VK_O){
+					modProjekce=1;
+					renderScene();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_P){
+					modProjekce=0;
+					renderScene();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_C){
+					isCube=!isCube;
+					if (isCube==true) {
 
-
-				else if (e.getKeyCode() == KeyEvent.VK_F) {
-					System.out.println("ScanLine");
-					draw(() -> {
-						scanLine.fill(polygonA, RImage,polygoner2D,patternFill.fill(c1%2,r1%2),0xffff00,liner);
-						polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-					});
-
-				}else if (e.getKeyCode() == KeyEvent.VK_B) {
-					System.out.println("Vyber si bod pro seedfill");
-					mode=5;
-
-
-					if (bodSeedFill==true){
-						draw(() -> {
-							polygoner2D.drawPolygon(RImage, 0xffff00, liner, polygonA);
-							polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-							RImage.getPixel(seedFillX, seedFillY).ifPresent(p -> {
-								seedFill4Queue.fill(RImage, seedFillX, seedFillY,patternFill.fill(c1,r1), new Predicate<Integer>() {
-									@Override
-									public boolean test(Integer integer) {
-										return Objects.equals(p, integer);
-									}
-								});
-							});
-						});
-					}}else if (e.getKeyCode() == KeyEvent.VK_A) {
-					System.out.println("SeedFill4-Barva hranice");
-
-
-					if (bodSeedFill==true){
-						draw(() -> {
-							polygoner2D.drawPolygon(RImage, 0xffff00, liner, polygonA);
-							polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-							RImage.getPixel(seedFillX, seedFillY).ifPresent(p -> {
-								seedFill4Queue.fill(RImage, seedFillX, seedFillY,patternFill.fill(c1,r1), new Predicate<Integer>() {
-									@Override
-									public boolean test(Integer integer) {
-										return Objects.equals(p, integer);
-									}
-								});
-							});
-						});
-					}}
-				else if (e.getKeyCode() == KeyEvent.VK_H) {
-					System.out.println("HRANICE");
-					mode=6;
-
-
-				}else if (e.getKeyCode() == KeyEvent.VK_J) {
-					System.out.println("CROP");
-					draw(()->{
-						polygoner2D.drawPolygon(RImage, 0xffff00, liner, polygonA);
-						polygoner2D.drawPolygon(RImage, 0x0000ff, liner, polygonCrop);
-						polygonCutter.cut(polygonA,polygonCrop, RImage,polygoner2D,patternFill.fill(c1%2,r1%2),0xfff0ff,liner);
-
-					});
+						scene.addSolid(cube);
+					}else if (isCube==false){
+						scene.removeSolid(cube);
+					}
+					renderScene();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_V){
+					isPyramid=!isPyramid;
+					if (isPyramid==true) {
+						scene.addSolid(pyramid);
+					}else{
+						scene.removeSolid(pyramid);
+					}
+					renderScene();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_B){
+					isPrism=!isPrism;
+					if (isPrism==true) {
+						scene.addSolid(prism);
+					}else{
+						scene.removeSolid(prism);
+					}
+					renderScene();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_N){
+					isSinus=!isSinus;
+					if (isSinus==true) {
+						scene.addSolid(sinus);
+					}else{
+						scene.removeSolid(sinus);
+					}
+					renderScene();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_M){
+					isAnimace=!isAnimace;
+					if (isAnimace==true) {
+						scene.addSolid(animatedCube);
+					}else{
+						scene.removeSolid(animatedCube);
+					}
+					renderScene();
 				}
 			}
-
 			@Override
 			public void keyReleased(KeyEvent e) {
 			}
 		});
+
 	}
+	ActionListener al=new ActionListener() {
+		public void actionPerformed(ActionEvent ae) {
+			cubeTransform = scene.getModelMats().get(0);
+			if(modRotace==1){
+				cubeTransform = cubeTransform.mul(new Mat4RotZ(0.0174533));
+			}else if(modRotace==2){
+				cubeTransform = cubeTransform.mul(new Mat4RotX(0.0174533));
+			}else if(modRotace==3){
+				cubeTransform = cubeTransform.mul(new Mat4RotY(0.0174533));
+			}
+			else if(isAnimace==true){
+				scene.addSolid(animatedCube,anim1);
+			}
+
+
+
+			scene.getModelMats().set(0, cubeTransform);
+			renderScene();
+		}
+	};
+	Timer timer=new Timer(10,al);
+
 
 	public void draw(final @NotNull Runnable r) {
 		clear();
 		r.run();
 		present();
 	}
-	public void clear() {
-		RImage.clear(0x2f2f2f);
-		RImage.drawHelp();
-	}
 
-	public void reset() {
-		RImage.clear(0x2f2f2f);
-		polygon2D.removeAllPoints();
-		polygonA.removeAllPoints();
-		polygonCrop.removeAllPoints();
-		RImage.drawHelp();
+	public void clear() {
+		img.clear(0x2f2f2f);
 	}
 
 	public void present(final @NotNull Graphics graphics) {
 		presenter.present(graphics);
 	}
+
 	public void present() {
 		final @Nullable Graphics g = panel.getGraphics();
 		if (g != null) {
@@ -355,13 +323,127 @@ public class Canvas {
 		}
 	}
 
-	public void start() {
+	private double getAzimuthToOrigin(final @NotNull Vec3D pos){
+		final @NotNull Vec3D v=pos.opposite();
+		final double alpha=v.ignoreZ().normalized()
+				.map(vNorm->Math.acos(vNorm.dot(new Vec2D(1,0))))
+				.orElse(0.0);
+		return (v.getY()>0)? alpha : Math.PI*2- alpha;
+	}
+
+	private double getZenithToOrigin(final @NotNull Vec3D pos){
+		final @NotNull Vec3D v=pos.opposite();
+		final double alpha= v.normalized()
+				.map(vNorm-> Math.acos(vNorm.dot(new Vec3D(0,0,1))))
+				.orElse(Math.PI/2);
+		return Math.PI/2 - alpha;
+		//sklární součin
+	}
+
+	public void renderScene(){
 		clear();
+		if (modProjekce==0){
+			renderer.renderScene(scene,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0xff00f0,
+					liner);
+			renderer.renderScene(scenex,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0x0000ff,
+					liner);
+			renderer.renderScene(sceney,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0x00ff00,
+					liner);
+			renderer.renderScene(scenez,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0xff0000,
+					liner);}
+		if (modProjekce==1){
+			renderer.renderScene(scene,
+					camera.getViewMatrix(),
+					orthMatrix,
+					img,
+					0xff00f0,
+					liner);
+			renderer.renderScene(scenex,
+					camera.getViewMatrix(),
+					orthMatrix,
+					img,
+					0x0000ff,
+					liner);
+			renderer.renderScene(sceney,
+					camera.getViewMatrix(),
+					orthMatrix,
+					img,
+					0x00ff00,
+					liner);
+			renderer.renderScene(scenez,
+					camera.getViewMatrix(),
+					orthMatrix,
+					img,
+					0xff0000,
+					liner);
+		}
 		present();
 	}
 
-	public static void main(String[] args) {		// Metoda pro vytvoření instance třídy Canvas a spuštění aplikace
-		SwingUtilities.invokeLater(() -> new Canvas(800, 700).start());
+	public Camera updateCamera(Vec3D pos){
+		camera=new Camera()
+				.withPosition(pos)
+				.withAzimuth(getAzimuthToOrigin(pos))
+				.withZenith(getZenithToOrigin(pos));
+		return camera;
+	}
+
+	public Vec3D rotaceX(Vec3D pos){
+
+		return pos;
+	}
+
+	public void start() {
+		clear();
+		draw(() -> {
+			renderer.renderScene(scene,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0xff00f0,
+					liner);
+			renderer.renderScene(scenex,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0x0000ff,
+					liner);
+			renderer.renderScene(sceney,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0x00ff00,
+					liner);
+			renderer.renderScene(scenez,
+					camera.getViewMatrix(),
+					projectionMatrix,
+					img,
+					0xff0000,
+					liner);
+		});
+		present();
+	}
+
+	public static void main(String[] args) {
+
+		SwingUtilities.invokeLater(() -> new Canvas(800, 600).start());
+
 	}
 
 }

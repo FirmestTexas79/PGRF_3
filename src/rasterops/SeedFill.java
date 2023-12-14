@@ -5,6 +5,10 @@ import rasterdata.RasterImage;
 
 import java.util.function.Predicate;
 
+/**
+ * Representing algorithms capable of filling a polygon defined in a {@link RasterImage} with pixels of the given type
+ * @param <P> pixel type
+ */
 public interface SeedFill<P> {
 
     /**
