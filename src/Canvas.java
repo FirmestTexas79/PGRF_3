@@ -12,15 +12,7 @@ import transform.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Objects;
-import java.util.function.Predicate;
 
-/**
- * trida pro kresleni na platno: zobrazeni pixelu
- *
- * @author PGRF FIM UHK
- * @version 2020
- */
 
 public class Canvas {
 
@@ -53,6 +45,8 @@ public class Canvas {
 	private final @NotNull Cube animatedCube;
 	private final @NotNull Pyramid pyramid;
 	private final @NotNull Prism prism;
+
+
 	private final @NotNull Sinus sinus;
 	private @NotNull Mat4 projectionMatrix;
 	private @NotNull Mat4 orthMatrix;
@@ -66,7 +60,7 @@ public class Canvas {
 	public Canvas(int width, int height) {
 		frame = new JFrame();
 		frame.setLayout(new BorderLayout());
-		frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
+		frame.setTitle("UHK FIM PGRF : Maťašovský Samuel" + this.getClass().getName());
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		final @NotNull RasterImageBI auxRasterImageBI = new RasterImageBI(width, height);
@@ -78,9 +72,9 @@ public class Canvas {
 		animatedCube=new Cube();
 		pyramid=new Pyramid();
 		prism=new Prism();
-		sinus=new Sinus(50000);
+		sinus=new Sinus(100);
 		liner = new TrivialLiner<>();
-		dottedLiner = new DottedLiner<>(1, 5);
+		dottedLiner = new DottedLiner<>(1, 4);
 		seedFill = new SeedFill4<>();
 		scene=new Scene();
 		scene.addSolid(cube);
@@ -97,9 +91,11 @@ public class Canvas {
 		zvetseniAnim = new Mat4Scale(2);
 		sceney.addSolid(new Plocha());
 
-		scenex.addSolid(new Bezier(50000, new Point3D(-1,-3,1),new Point3D(-0.5,-3,0),new Point3D(1,-3,2),new Point3D(2,-3,3)));
-		scenex.addSolid(new Ferguson(50000,new Point3D(-1,-4,2),new Point3D(-0.5,-4,0),new Point3D(1,-4,2),new Point3D(2,-4,3)));
-		scenex.addSolid(new Coons(50000,new Point3D(-1,-6,2),new Point3D(-0.5,-6,0),new Point3D(1,-6,2),new Point3D(2,-6,3)));
+		scenex.addSolid(new Bezier(50000, new Point3D(-5, -2, 3), new Point3D(-3, -1, 2), new Point3D(0, -4, 1), new Point3D(2, -3, 5)));
+		scenex.addSolid(new Ferguson(50000, new Point3D(-2, -3, 4), new Point3D(0, -2, 1), new Point3D(2, -4, 3), new Point3D(4, -3, 4)));
+		scenex.addSolid(new Coons(50000, new Point3D(-3, -5, 2), new Point3D(-1, -6, 0), new Point3D(1, -5, 2), new Point3D(3, -6, 3)));
+
+
 
 		renderer=new RenderLineList<>();
 		pos = new Vec3D(3.2, 4, 3);
@@ -138,7 +134,6 @@ public class Canvas {
 				mouseWheelMoved[0] += e.getPreciseWheelRotation();
 
 				final double[] moveBy = {0.1};
-				// zoom camera with mouse wheel
 				if (mouseWheelMoved[0] != 0) {
 					camera = camera.move(camera.getViewVector().mul(moveBy[0] * 5 * -mouseWheelMoved[0]));
 					mouseWheelMoved[0] = 0;
@@ -343,55 +338,15 @@ public class Canvas {
 	public void renderScene(){
 		clear();
 		if (modProjekce==0){
-			renderer.renderScene(scene,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0xff00f0,
-					liner);
-			renderer.renderScene(scenex,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0x0000ff,
-					liner);
-			renderer.renderScene(sceney,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0x00ff00,
-					liner);
-			renderer.renderScene(scenez,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0xff0000,
-					liner);}
+			renderer.renderScene(scene, camera.getViewMatrix(), projectionMatrix, img, 0xff00f0, liner);
+			renderer.renderScene(scenex, camera.getViewMatrix(), projectionMatrix, img, 0x0000ff, liner);
+			renderer.renderScene(sceney, camera.getViewMatrix(), projectionMatrix, img, 0x00ff00, liner);
+			renderer.renderScene(scenez, camera.getViewMatrix(), projectionMatrix, img, 0xff0000, liner);}
 		if (modProjekce==1){
-			renderer.renderScene(scene,
-					camera.getViewMatrix(),
-					orthMatrix,
-					img,
-					0xff00f0,
-					liner);
-			renderer.renderScene(scenex,
-					camera.getViewMatrix(),
-					orthMatrix,
-					img,
-					0x0000ff,
-					liner);
-			renderer.renderScene(sceney,
-					camera.getViewMatrix(),
-					orthMatrix,
-					img,
-					0x00ff00,
-					liner);
-			renderer.renderScene(scenez,
-					camera.getViewMatrix(),
-					orthMatrix,
-					img,
-					0xff0000,
-					liner);
+			renderer.renderScene(scene, camera.getViewMatrix(), orthMatrix, img, 0xff00f0, liner);
+			renderer.renderScene(scenex, camera.getViewMatrix(), orthMatrix, img, 0x0000ff, liner);
+			renderer.renderScene(sceney, camera.getViewMatrix(), orthMatrix, img, 0x00ff00, liner);
+			renderer.renderScene(scenez, camera.getViewMatrix(), orthMatrix, img, 0xff0000, liner);
 		}
 		present();
 	}
@@ -412,30 +367,10 @@ public class Canvas {
 	public void start() {
 		clear();
 		draw(() -> {
-			renderer.renderScene(scene,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0xff00f0,
-					liner);
-			renderer.renderScene(scenex,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0x0000ff,
-					liner);
-			renderer.renderScene(sceney,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0x00ff00,
-					liner);
-			renderer.renderScene(scenez,
-					camera.getViewMatrix(),
-					projectionMatrix,
-					img,
-					0xff0000,
-					liner);
+			renderer.renderScene(scene, camera.getViewMatrix(), projectionMatrix, img, 0xff00f0, liner);
+			renderer.renderScene(scenex, camera.getViewMatrix(), projectionMatrix, img, 0x0000ff, liner);
+			renderer.renderScene(sceney, camera.getViewMatrix(), projectionMatrix, img, 0x00ff00, liner);
+			renderer.renderScene(scenez, camera.getViewMatrix(), projectionMatrix, img, 0xff0000, liner);
 		});
 		present();
 	}

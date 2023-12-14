@@ -2,24 +2,22 @@ package objectdata;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
-
-public class Hrana {
+public class Edge {
 
     private final @NotNull Point start;
     private final @NotNull Point end;
 
-    public Hrana(@NotNull Point start, @NotNull Point end) {
+    public Edge(@NotNull Point start, @NotNull Point end) {
         this.start = start;
         this.end = end;
     }
 
-    public @NotNull Hrana oriented(){
+    public @NotNull Edge oriented(){
 
         if (start.getR1()<end.getR1()){
-            return new Hrana(end,start);
+            return new Edge(end,start);
         }else {
-            return new Hrana(start,end);
+            return new Edge(start,end);
         }
     }
 
@@ -27,15 +25,15 @@ public class Hrana {
         return (y >= start.getC1() && y <= end.getR1());
     }
 
-    public @NotNull Hrana shortened(){
+    public @NotNull Edge shortened(){
         if (end.getC1() == start.getC1()) {
-            return new Hrana(start, new Point(end.getC1(), end.getR1() - 1));
+            return new Edge(start, new Point(end.getC1(), end.getR1() - 1));
         } else {
             final double k = (end.getR1() - end.getR1()) / (double) (end.getC1() - start.getC1());
             final double q = start.getR1() - k * start.getC1();
             int y = (int) Math.round(k * end.getC1() + q);
 
-            return new Hrana(start, new Point(end.getC1(), y - 1));
+            return new Edge(start, new Point(end.getC1(), y - 1));
         }
 
 
