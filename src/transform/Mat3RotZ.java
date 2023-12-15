@@ -1,15 +1,21 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package transform;
 
+/**
+ * A 3x3 matrix of right-handed rotation about z-axis
+ */
 public class Mat3RotZ extends Mat3Identity {
-    public Mat3RotZ(double alpha) {
-        this.mat[0][0] = Math.cos(alpha);
-        this.mat[1][1] = Math.cos(alpha);
-        this.mat[1][0] = -Math.sin(alpha);
-        this.mat[0][1] = Math.sin(alpha);
+
+    /**
+     * Creates a 3x3 transformation matrix equivalent to right-handed rotation
+     * about z-axis
+     *
+     * @param alpha
+     *            rotation angle in radians
+     */
+    public Mat3RotZ(final double alpha) {
+        mat[0][0] = Math.cos(alpha);
+        mat[1][1] = Math.cos(alpha);
+        mat[1][0] = -Math.sin(alpha);
+        mat[0][1] = Math.sin(alpha);
     }
 }

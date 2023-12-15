@@ -1,18 +1,33 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package transform;
 
+/**
+ * A 4x4 matrix of translation
+ */
 public class Mat4Transl extends Mat4Identity {
-    public Mat4Transl(double x, double y, double z) {
-        this.mat[3][0] = x;
-        this.mat[3][1] = y;
-        this.mat[3][2] = z;
-    }
 
-    public Mat4Transl(Vec3D v) {
+    /**
+     * Creates a 4x4 transformation matrix equivalent to translation in 3D
+     *
+     * @param x
+     *            translation along x-axis
+     * @param y
+     *            translation along y-axis
+     * @param z
+     *            translation along z-axis
+     */
+    public Mat4Transl(final double x, final double y, final double z) {
+        mat[3][0] = x;
+        mat[3][1] = y;
+        mat[3][2] = z;
+    }
+    /**
+     * Creates a 4x4 transformation matrix equivalent to translation in 3D
+     *
+     * @param v
+     *            translation vector
+     */
+    public Mat4Transl(final Vec3D v) {
         this(v.getX(), v.getY(), v.getZ());
     }
+
 }

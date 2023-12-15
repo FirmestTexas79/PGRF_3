@@ -1,15 +1,20 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package transform;
 
+/**
+ * A 4x4 matrix of right-handed rotation about x-axis
+ */
 public class Mat4RotX extends Mat4Identity {
-    public Mat4RotX(double alpha) {
-        this.mat[1][1] = Math.cos(alpha);
-        this.mat[2][2] = Math.cos(alpha);
-        this.mat[2][1] = -Math.sin(alpha);
-        this.mat[1][2] = Math.sin(alpha);
+
+    /**
+     * Creates a 4x4 transformation matrix equivalent to right-handed rotation
+     * about x-axis
+     *
+     * @param alpha rotation angle in radians
+     */
+    public Mat4RotX(final double alpha) {
+        mat[1][1] = Math.cos(alpha);
+        mat[2][2] = Math.cos(alpha);
+        mat[2][1] = -Math.sin(alpha);
+        mat[1][2] = Math.sin(alpha);
     }
 }

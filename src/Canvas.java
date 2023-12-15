@@ -278,11 +278,11 @@ public class Canvas {
 		public void actionPerformed(ActionEvent ae) {
 			cubeTransform = scene.getModelMats().get(0);
 			if(modRotace==1){
-				cubeTransform = cubeTransform.mul(new Mat4RotZ(0.0174533));
+				cubeTransform = cubeTransform.mul(new Mat4RotZ(0.0175));
 			}else if(modRotace==2){
-				cubeTransform = cubeTransform.mul(new Mat4RotX(0.0174533));
+				cubeTransform = cubeTransform.mul(new Mat4RotX(0.0175));
 			}else if(modRotace==3){
-				cubeTransform = cubeTransform.mul(new Mat4RotY(0.0174533));
+				cubeTransform = cubeTransform.mul(new Mat4RotY(0.0175));
 			}
 			else if(isAnimace==true){
 				scene.addSolid(animatedCube,anim1);

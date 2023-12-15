@@ -1,22 +1,44 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package transform;
 
+/**
+ * A 4x4 matrix of 3D scaling
+ */
 public class Mat4Scale extends Mat4Identity {
-    public Mat4Scale(double x, double y, double z) {
-        this.mat[0][0] = x;
-        this.mat[1][1] = y;
-        this.mat[2][2] = z;
+
+    /**
+     * Creates a 4x4 transformation matrix equivalent to scaling in 3D
+     *
+     * @param x
+     *            x-axis scale factor
+     * @param y
+     *            y-axis scale factor
+     * @param z
+     *            z-axis scale factor
+     */
+    public Mat4Scale(final double x, final double y, final double z) {
+        mat[0][0] = x;
+        mat[1][1] = y;
+        mat[2][2] = z;
     }
 
-    public Mat4Scale(double scale) {
+    /**
+     * Creates a 4x4 transformation matrix equivalent to uniform scaling in 3D
+     *
+     * @param scale
+     *            x,y,z -axis scale factor
+     */
+    public Mat4Scale(final double scale) {
         this(scale, scale, scale);
     }
 
-    public Mat4Scale(Vec3D v) {
+    /**
+     * Creates a 4x4 transformation matrix equivalent to scaling in 3D
+     *
+     * @param v
+     *            vector scale factor
+     */
+    public Mat4Scale(final Vec3D v) {
         this(v.getX(), v.getY(), v.getZ());
     }
+
 }

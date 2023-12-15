@@ -9,23 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class Pyramid implements Solid{
+public class Pyramid implements Solid {
 
     private final @NotNull List<Point3D> vertices;
     private final @NotNull List<Integer> indices;
+    private static final double SCALE_FACTOR = 1.5; // Měřítko
+    private static final double X_TRANSLATION = -5.0; // Posunutí po -x
 
-    public Pyramid(){
-        vertices=new ArrayList<>();
-        vertices.add(new Point3D(0,0,0.8));
+    public Pyramid() {
+        vertices = new ArrayList<>();
+        vertices.add(new Point3D(0, 0, 0.8 * SCALE_FACTOR));
 
+        vertices.add(new Point3D(0.8 * SCALE_FACTOR, 0.8 * SCALE_FACTOR, -0.8 * SCALE_FACTOR));
+        vertices.add(new Point3D(0.8 * SCALE_FACTOR, -0.8 * SCALE_FACTOR, -0.8 * SCALE_FACTOR));
+        vertices.add(new Point3D(-0.8 * SCALE_FACTOR, -0.8 * SCALE_FACTOR, -0.8 * SCALE_FACTOR));
+        vertices.add(new Point3D(-0.8 * SCALE_FACTOR, 0.8 * SCALE_FACTOR, -0.8 * SCALE_FACTOR));
 
-        vertices.add(new Point3D(0.8,0.8,-0.8));
-        vertices.add(new Point3D(0.8,-0.8,-0.8));
-        vertices.add(new Point3D(-0.8,-0.8,-0.8));
-        vertices.add(new Point3D(-0.8,0.8,-0.8));
-
-
-        indices=new ArrayList<>();
+        indices = new ArrayList<>();
         indices.add(0);
         indices.add(1);
         indices.add(0);
@@ -44,7 +44,11 @@ public class Pyramid implements Solid{
         indices.add(4);
         indices.add(1);
 
-
+        // Posunutí všech bodů po -x
+        for (int i = 0; i < vertices.size(); i++) {
+            Point3D vertex = vertices.get(i);
+            vertices.set(i, new Point3D(vertex.getX() + X_TRANSLATION, vertex.getY(), vertex.getZ()));
+        }
     }
 
     @Override
@@ -56,5 +60,4 @@ public class Pyramid implements Solid{
     public @NotNull List<Integer> indices() {
         return indices;
     }
-
 }
