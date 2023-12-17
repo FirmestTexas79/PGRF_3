@@ -1,5 +1,4 @@
 import objectdata.*;
-import objectdata.Point;
 import objectops.RenderLineList;
 import objectops.Renderer;
 import org.jetbrains.annotations.NotNull;
@@ -38,13 +37,13 @@ public class Canvas {
 	private int modRotace=0;
 	private boolean isCube=true;
 	private boolean isPyramid;
-	private boolean isPrism=true;
+	private boolean isCrystal =true;
 	private boolean isSinus=true;
 	private boolean isAnimace=false;
 	private final @NotNull Cube cube;
 	private final @NotNull Cube animatedCube;
-	private final @NotNull Pyramid pyramid;
-	private final @NotNull Prism prism;
+	private final @NotNull Pyramida pyramida;
+	private final @NotNull Crystal crystal;
 
 
 	private final @NotNull Sinus sinus;
@@ -53,7 +52,7 @@ public class Canvas {
 	private Vec3D pos;
 	private final Mat4 anim2;
 	private final Mat4 anim1;
-	private final Mat4 zvetseniAnim;
+	private final Mat4 zvetseniAnimace;
 	int modProjekce=0;
 
 
@@ -70,15 +69,15 @@ public class Canvas {
 		polygoner2D = new Polygoner2D<>();
 		cube=new Cube();
 		animatedCube=new Cube();
-		pyramid=new Pyramid();
-		prism=new Prism();
+		pyramida =new Pyramida();
+		crystal =new Crystal();
 		sinus=new Sinus(100);
 		liner = new TrivialLiner<>();
 		dottedLiner = new DottedLiner<>(1, 4);
 		seedFill = new SeedFill4<>();
 		scene=new Scene();
 		scene.addSolid(cube);
-		scene.addSolid(prism);
+		scene.addSolid(crystal);
 		scenex=new Scene();
 		scenex.addSolid(new AxisX());
 		sceney=new Scene();
@@ -88,7 +87,7 @@ public class Canvas {
 		scene.addSolid(sinus);
 		anim1 = new Mat4RotZ(0.03).mul(new Mat4Scale(1.01)).mul(new Mat4RotY(0.03)).mul(new Mat4RotX(-0.01));
 		anim2 = new Mat4RotZ(0.03).mul(new Mat4Scale(0.99)).mul(new Mat4RotY(0.03)).mul(new Mat4RotX(-0.01));
-		zvetseniAnim = new Mat4Scale(2);
+		zvetseniAnimace = new Mat4Scale(2);
 		sceney.addSolid(new Plocha());
 
 		scenex.addSolid(new Bezier(50000, new Point3D(-5, -2, 3), new Point3D(-3, -1, 2), new Point3D(0, -4, 1), new Point3D(2, -3, 5)));
@@ -151,23 +150,17 @@ public class Canvas {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 			}
-
 		});
 
-
 		panel.setPreferredSize(new Dimension(width, height));
-
 		frame.add(panel, BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
 
-
 		frame.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
-
 			}
-
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_D) {
@@ -176,7 +169,6 @@ public class Canvas {
 				} if (e.getKeyCode() == KeyEvent.VK_W){
 					camera=camera.forward(0.1);
 					renderScene();
-
 				} if (e.getKeyCode() == KeyEvent.VK_S){
 					camera=camera.backward(0.1);
 					renderScene();
@@ -234,18 +226,18 @@ public class Canvas {
 				if (e.getKeyCode() == KeyEvent.VK_V){
 					isPyramid=!isPyramid;
 					if (isPyramid==true) {
-						scene.addSolid(pyramid);
+						scene.addSolid(pyramida);
 					}else{
-						scene.removeSolid(pyramid);
+						scene.removeSolid(pyramida);
 					}
 					renderScene();
 				}
 				if (e.getKeyCode() == KeyEvent.VK_B){
-					isPrism=!isPrism;
-					if (isPrism==true) {
-						scene.addSolid(prism);
+					isCrystal =!isCrystal;
+					if (isCrystal ==true) {
+						scene.addSolid(crystal);
 					}else{
-						scene.removeSolid(prism);
+						scene.removeSolid(crystal);
 					}
 					renderScene();
 				}
@@ -338,12 +330,12 @@ public class Canvas {
 	public void renderScene(){
 		clear();
 		if (modProjekce==0){
-			renderer.renderScene(scene, camera.getViewMatrix(), projectionMatrix, img, 0xff00f0, liner);
+			renderer.renderScene(scene, camera.getViewMatrix(), projectionMatrix, img, 0xff7f50, liner);
 			renderer.renderScene(scenex, camera.getViewMatrix(), projectionMatrix, img, 0x0000ff, liner);
 			renderer.renderScene(sceney, camera.getViewMatrix(), projectionMatrix, img, 0x00ff00, liner);
 			renderer.renderScene(scenez, camera.getViewMatrix(), projectionMatrix, img, 0xff0000, liner);}
 		if (modProjekce==1){
-			renderer.renderScene(scene, camera.getViewMatrix(), orthMatrix, img, 0xff00f0, liner);
+			renderer.renderScene(scene, camera.getViewMatrix(), orthMatrix, img, 0xff7f50, liner);
 			renderer.renderScene(scenex, camera.getViewMatrix(), orthMatrix, img, 0x0000ff, liner);
 			renderer.renderScene(sceney, camera.getViewMatrix(), orthMatrix, img, 0x00ff00, liner);
 			renderer.renderScene(scenez, camera.getViewMatrix(), orthMatrix, img, 0xff0000, liner);
@@ -367,7 +359,7 @@ public class Canvas {
 	public void start() {
 		clear();
 		draw(() -> {
-			renderer.renderScene(scene, camera.getViewMatrix(), projectionMatrix, img, 0xff00f0, liner);
+			renderer.renderScene(scene, camera.getViewMatrix(), projectionMatrix, img, 0xff7f50, liner);
 			renderer.renderScene(scenex, camera.getViewMatrix(), projectionMatrix, img, 0x0000ff, liner);
 			renderer.renderScene(sceney, camera.getViewMatrix(), projectionMatrix, img, 0x00ff00, liner);
 			renderer.renderScene(scenez, camera.getViewMatrix(), projectionMatrix, img, 0xff0000, liner);
@@ -376,9 +368,6 @@ public class Canvas {
 	}
 
 	public static void main(String[] args) {
-
 		SwingUtilities.invokeLater(() -> new Canvas(800, 600).start());
-
 	}
-
 }

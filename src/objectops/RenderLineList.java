@@ -10,10 +10,7 @@ import transform.Point2D;
 import transform.Point3D;
 import transform.Vec3D;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class RenderLineList<P> implements Renderer<P>{
@@ -59,23 +56,13 @@ public class RenderLineList<P> implements Renderer<P>{
             final @NotNull Point3D p2= transformedVertices.get(solid.indices().get(i+1));
             //clip by w
             if (
-                //                  p1.getZ()>=0 && p1.getZ()<= p1.getW() &&
-                //                  p1.getX()>=-p1.getW() && p1.getX()<= p1.getW() &&
-                //                  p1.getY()>=-p1.getW() && p1.getY()<= p1.getW() &&
-                //                 p2.getZ()>=0 && p2.getZ()<= p2.getW() &&
-                //                  p2.getX()>=-p2.getW() && p2.getX()<= p2.getW() &&
-                //                  p2.getY()>=-p2.getW() && p2.getY()<= p2.getW()
-
-                    !(
-                            p1.getX()<-p1.getW() && p2.getX()< -p2.getW() ||
-                                    p1.getX()>p1.getW() && p2.getX()>p2.getW() ||
-                                    p1.getY()<-p1.getW() && p2.getY()< -p2.getW() ||
-                                    p1.getY()>p1.getW() && p2.getY()>p2.getW() ||
-                                    p1.getZ()<0 || p2.getZ()<0 ||p1.getZ()>p1.getW() || p2.getZ()>p2.getW()
-                    )
-
-            ){  //TODO fix cropping
-                //dehomoh
+                    p1.getZ() >= 0 && p1.getZ() <= p1.getW() &&
+                            p1.getX() >= -p1.getW() && p1.getX() <= p1.getW() &&
+                            p1.getY() >= -p1.getW() && p1.getY() <= p1.getW() &&
+                            p2.getZ() >= 0 && p2.getZ() <= p2.getW() &&
+                            p2.getX() >= -p2.getW() && p2.getX() <= p2.getW() &&
+                            p2.getY() >= -p2.getW() && p2.getY() <= p2.getW()
+            ) {
                 p1.dehomog().ifPresent(start->p2.dehomog().ifPresent(end->{
                     //transformation to viewport
                     final int c1=(int)((start.getX()+1) /2.*(img.getWidth()-1));
@@ -89,25 +76,6 @@ public class RenderLineList<P> implements Renderer<P>{
         });
     }
 }
-/*
-        p1.getZ()>=0 && p1.getZ()<= p1.getW() &&
-        p1.getX()>=-p1.getW() && p1.getX()<= p1.getW() &&
-        p1.getY()>=-p1.getW() && p1.getY()<= p1.getW() &&
-
-        p2.getZ()>=0 && p2.getZ()<= p2.getW() &&
-        p2.getX()>=-p2.getW() && p2.getX()<= p2.getW() &&
-        p2.getY()>=-p2.getW() && p2.getY()<= p2.getW()
-
-                p1.getX() <= p1.getW() && p1.getX() >= -p1.getW() &&
-                p1.getY() <= p1.getW() && p1.getY() >= -p1.getW() &&
-                p1.getZ() <= p1.getW() && p1.getZ() >= 0;
-
-                p2.getX() <= p2.getW() && p2.getX() >= -p2.getW() &&
-                p2.getY() <= p2.getW() && p2.getY() >= -p2.getW() &&
-                p2.getZ() <= p2.getW() && p2.getZ() >= 0;
- */
-
-
 
 
 

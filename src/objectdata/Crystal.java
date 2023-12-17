@@ -6,11 +6,11 @@ import transform.Point3D;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Prism implements Solid{
+public class Crystal implements Solid{
     private final @NotNull List<Point3D> vertices;
     private final @NotNull List<Integer> indices;
 
-    public Prism(){
+    public Crystal(){
         vertices=new ArrayList<>();
         vertices.add(new Point3D(2,0,0.8));
 

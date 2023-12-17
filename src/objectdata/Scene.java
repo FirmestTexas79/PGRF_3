@@ -20,7 +20,6 @@ public class Scene {
         return modelMats;
     }
 
-
     public @NotNull List<Solid> getSolids() {
         return solids;
     }

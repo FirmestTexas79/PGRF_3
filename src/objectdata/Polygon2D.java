@@ -32,9 +32,7 @@ public class Polygon2D {
 
             transform.Point2D p=new transform.Point2D(point2D.getX(),point2D.getY());
             p.mul(transMat);
-
             polygon2D.addPoint(point2D);
-
         }
         return polygon2D;
     }

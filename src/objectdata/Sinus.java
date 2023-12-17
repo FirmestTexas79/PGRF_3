@@ -24,10 +24,8 @@ public class Sinus implements Solid{
         for (int i=0;i< vertices().size()-1;i++){
             indices.add(i);
             indices.add(i+1);
-
         }
     }
-
 
     @Override
     public @NotNull List<Point3D> vertices() {

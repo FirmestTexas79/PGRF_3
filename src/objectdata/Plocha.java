@@ -10,28 +10,34 @@ public class Plocha implements Solid{
     private final @NotNull List<Point3D> vertices;
     private final @NotNull List<Integer> indices;
 
-    public Plocha(){
-        vertices=new ArrayList<>();
-        indices=new ArrayList<>();
-        vertices.add(new Point3D(-2,-2,-2));
-        vertices.add(new Point3D(-1.5,-2,-2));
-        vertices.add(new Point3D(-1,-2,-2));
-        vertices.add(new Point3D(-0.5,-2,-2));
+    public Plocha() {
+        vertices = new ArrayList<>();
+        indices = new ArrayList<>();
 
-        vertices.add(new Point3D(-2,-1.5,-2));
-        vertices.add(new Point3D(-1.5,-1.5,-2));
-        vertices.add(new Point3D(-1,-1.5,-2));
-        vertices.add(new Point3D(-0.5,-1.5,-2));
+        double translationX = -5.0; // Posunutí ve směru X
+        double translationY = 0.0; // Žádné posunutí ve směru Y
+        double translationZ = 0.0; // Žádné posunutí ve směru Z
 
-        vertices.add(new Point3D(-2,-1,-2));
-        vertices.add(new Point3D(-1.5,-1,-2));
-        vertices.add(new Point3D(-1,-1,-2));
-        vertices.add(new Point3D(-0.5,-1,-2));
+// Přepsání souřadnic vrcholů
+        vertices.add(new Point3D(-2 + translationX, -2 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1.5 + translationX, -2 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1 + translationX, -2 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-0.5 + translationX, -2 + translationY, -2 + translationZ));
 
-        vertices.add(new Point3D(-2,-0.5,-2));
-        vertices.add(new Point3D(-1.5,-0.5,-2));
-        vertices.add(new Point3D(-1,-0.5,-2));
-        vertices.add(new Point3D(-0.5,-0.5,-2));
+        vertices.add(new Point3D(-2 + translationX, -1.5 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1.5 + translationX, -1.5 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1 + translationX, -1.5 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-0.5 + translationX, -1.5 + translationY, -2 + translationZ));
+
+        vertices.add(new Point3D(-2 + translationX, -1 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1.5 + translationX, -1 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1 + translationX, -1 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-0.5 + translationX, -1 + translationY, -2 + translationZ));
+
+        vertices.add(new Point3D(-2 + translationX, -0.5 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1.5 + translationX, -0.5 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-1 + translationX, -0.5 + translationY, -2 + translationZ));
+        vertices.add(new Point3D(-0.5 + translationX, -0.5 + translationY, -2 + translationZ));
 
         indices.add(0);
         indices.add(1);
@@ -99,8 +105,6 @@ public class Plocha implements Solid{
         indices.add(15);
 
     }
-
-
     @Override
     public @NotNull List<Point3D> vertices() {
         return vertices;

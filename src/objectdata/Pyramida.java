@@ -1,22 +1,19 @@
 package objectdata;
 
 import org.jetbrains.annotations.NotNull;
-import rasterdata.RasterImage;
-import transform.Point2D;
 import transform.Point3D;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
-public class Pyramid implements Solid {
+public class Pyramida implements Solid {
 
     private final @NotNull List<Point3D> vertices;
     private final @NotNull List<Integer> indices;
     private static final double SCALE_FACTOR = 1.5; // Měřítko
     private static final double X_TRANSLATION = -5.0; // Posunutí po -x
 
-    public Pyramid() {
+    public Pyramida() {
         vertices = new ArrayList<>();
         vertices.add(new Point3D(0, 0, 0.8 * SCALE_FACTOR));
 
