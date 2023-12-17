@@ -7,34 +7,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class Cube implements Solid{
+public class Cube implements Solid {
 
     private final @NotNull List<Point3D> vertices;
     private final @NotNull List<Integer> indices;
 
-    public Cube(){
-        vertices=new ArrayList<>();
-        vertices.add(new Point3D(-1,-1,-1));
-        vertices.add(new Point3D(1,-1,-1));
-        vertices.add(new Point3D(1,1,-1));
-        vertices.add(new Point3D(-1,1,-1));
+    public Cube() {
+        vertices = new ArrayList<>();
+        vertices.add(new Point3D(-1, -1, -1));
+        vertices.add(new Point3D(1, -1, -1));
+        vertices.add(new Point3D(1, 1, -1));
+        vertices.add(new Point3D(-1, 1, -1));
 
-        vertices.add(new Point3D(-1,-1,1));
-        vertices.add(new Point3D(1,-1,1));
-        vertices.add(new Point3D(1,1,1));
-        vertices.add(new Point3D(-1,1,1));
+        vertices.add(new Point3D(-1, -1, 1));
+        vertices.add(new Point3D(1, -1, 1));
+        vertices.add(new Point3D(1, 1, 1));
+        vertices.add(new Point3D(-1, 1, 1));
 
-        indices=new ArrayList<>();
-        IntStream.rangeClosed(0,3).forEach(i->{
+        indices = new ArrayList<>();
+        IntStream.rangeClosed(0, 3).forEach(i -> {
             indices.add(i);
-            indices.add((i+1)%4);
+            indices.add((i + 1) % 4);
 
             indices.add(i);
-            indices.add(i+4);
+            indices.add(i + 4);
 
-            indices.add(i+4);
-            indices.add((i+1)%4+4);
+            indices.add(i + 4);
+            indices.add((i + 1) % 4 + 4);
         });
+
+        double w_max = 100.0; // Určte vhodnou hodnotu
+        vertices.removeIf(vertex -> vertex.getW() < 0 || vertex.getW() > w_max);
     }
 
     @Override
