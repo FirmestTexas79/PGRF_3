@@ -14,7 +14,7 @@ public class Plocha implements Solid{
         vertices = new ArrayList<>();
         indices = new ArrayList<>();
 
-        double translationX = -5.0; // Posunutí ve směru X
+        double translationX = -3.0; // Posunutí ve směru X
         double translationY = 0.0; // Žádné posunutí ve směru Y
         double translationZ = 0.0; // Žádné posunutí ve směru Z
 
